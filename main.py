@@ -80,20 +80,6 @@ class Footbal:
 
 
 if __name__ == "__main__":
-    
-    def font_color_table(value):
-        color_value = "black"
-        if value > 50:
-            color_value = "green"
-        elif value < 30:
-            color_value = "red"
-
-        return f"color: {color_value}"
-
-
     championat = Footbal("csv\\rpl\\13-14.csv")
-
-    championat_font_mod = championat.final_table().style.applymap(font_color_table)
-    # print(championat_font_mod)
     # championat.final_table().to_csv("output.csv")
     print(championat.final_table())
