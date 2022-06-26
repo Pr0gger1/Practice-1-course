@@ -1,0 +1,5 @@
+/.idea
+/csv
+*.csv
+*.htm*
+*.json
