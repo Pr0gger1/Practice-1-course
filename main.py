@@ -3,7 +3,7 @@ from pandas import DataFrame
 
 class Footbal:
 
-    def __init__(self, file: str):
+    def __init__(self, file: str) -> None:
         self.data = pd.read_csv(file)
 
         # счёт команд
@@ -13,10 +13,10 @@ class Footbal:
         self.teams = [self.data["Команда_1"], self.data["Команда_2"]]
 
     def final_table(self) -> DataFrame:
-        table = self.__count_games()
-        goals = self.__calculate_goals()
-        game_scores = self.__calculate_game_scores()
-        final_scores = self.__calcultate_final_scores()
+        table: DataFrame = self.__count_games()
+        goals: DataFrame = self.__calculate_goals()
+        game_scores: DataFrame = self.__calculate_game_scores()
+        final_scores: DataFrame = self.__calcultate_final_scores()
 
         scores = game_scores.join(goals).join(final_scores)
 
@@ -31,7 +31,8 @@ class Footbal:
             "Игры": self.data["Команда_1"].value_counts() + 
                     self.data["Команда_2"].value_counts()}).reset_index().rename(columns={"index": "Команда"})
 
-    def __calculate_goals(self):
+    def __calculate_goals(self) -> DataFrame:
+        #маска для парсинга счета
         mask: list = list(map(lambda number: list(map(int, number[:3].split(":"))), self.score.to_list()))
 
         goals_1 = DataFrame({
@@ -66,17 +67,12 @@ class Footbal:
             "П": list(map(lambda x: 1 if x[1] < x[0] else 0, mask))
         }).groupby("Команда").sum().reset_index()
 
-        results = results_1[["В", "Н", "П"]].add(results_2[["В", "Н", "П"]])
-        return results
+        return results_1[["В", "Н", "П"]].add(results_2[["В", "Н", "П"]])
 
     def __calcultate_final_scores(self) -> DataFrame:
         table: DataFrame = self.__calculate_game_scores()
 
-        final_scores = DataFrame({
-            "О": table["В"] * 3 + table["Н"]
-        })
-
-        return final_scores
+        return DataFrame({"О": table["В"] * 3 + table["Н"]})
 
 
 if __name__ == "__main__":
