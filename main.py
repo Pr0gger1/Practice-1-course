@@ -1,9 +1,6 @@
-import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
-
-# основной класс
 class Footbal:
 
     def __init__(self, file: str):
@@ -30,10 +27,9 @@ class Footbal:
         return table
 
     def __count_games(self) -> DataFrame:
-        return pd.DataFrame({
-            "Игры": self.data["Команда_1"].value_counts() + self.data[
-                "Команда_2"].value_counts()}).reset_index().rename(
-            columns={"index": "Команда"})
+        return DataFrame({
+            "Игры": self.data["Команда_1"].value_counts() + 
+                    self.data["Команда_2"].value_counts()}).reset_index().rename(columns={"index": "Команда"})
 
     def __calculate_goals(self):
         mask: list = list(map(lambda number: list(map(int, number[:3].split(":"))), self.score.to_list()))
@@ -71,7 +67,6 @@ class Footbal:
         }).groupby("Команда").sum().reset_index()
 
         results = results_1[["В", "Н", "П"]].add(results_2[["В", "Н", "П"]])
-
         return results
 
     def __calcultate_final_scores(self) -> DataFrame:
