@@ -13,9 +13,13 @@ class Footbal:
         self.teams = [self.data["Команда_1"], self.data["Команда_2"]]
 
     def final_table(self) -> DataFrame:
+        #первичная таблица
         table: DataFrame = self.__count_games()
+        #таблица с забитыми и пропущенными голами
         goals: DataFrame = self.__calculate_goals()
+        #таблица с вычисленными победами, ничьими и поражениями
         game_scores: DataFrame = self.__calculate_game_scores()
+        #таблица с вычисленными итоговыми очками
         final_scores: DataFrame = self.__calcultate_final_scores()
 
         scores = game_scores.join(goals).join(final_scores)
