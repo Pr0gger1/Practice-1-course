@@ -95,4 +95,5 @@ if __name__ == "__main__":
 
     championat_font_mod = championat.final_table().style.applymap(font_color_table)
     # print(championat_font_mod)
+    # championat.final_table().to_csv("output.csv")
     print(championat.final_table())
