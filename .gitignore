@@ -2,4 +2,6 @@
 /*.csv
 *.htm*
 *.json
+*.png
+*.jp*g
 individual.py
