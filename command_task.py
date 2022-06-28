@@ -1,4 +1,4 @@
-import os.path
+from sys import argv
 
 import pandas as pd
 from pandas import DataFrame
@@ -6,7 +6,7 @@ from pandas import DataFrame
 
 class Football:
 
-    def __init__(self, file: str) -> None:
+    def __init__(self, file: str):
         # извлечение таблицы из csv файла
         self.data = pd.read_csv(file)
 
@@ -15,7 +15,7 @@ class Football:
         # команды, играющие друг против друга
         self.teams = [self.data["Команда_1"], self.data["Команда_2"]]
 
-    def final_table(self) -> DataFrame:
+    def final_table(self):
         # первичная таблица
         table: DataFrame = self.__count_games()
         # таблица с забитыми и пропущенными голами
@@ -32,12 +32,12 @@ class Football:
 
         return table
 
-    def __count_games(self) -> DataFrame:
+    def __count_games(self):
         # возвращается таблица с кол-вом игр
         return DataFrame({
             "Игры": self.data["Команда_1"].value_counts() + self.data["Команда_2"].value_counts()})
 
-    def __calculate_goals(self) -> DataFrame:
+    def __calculate_goals(self):
         # возвращается таблица с кол-вом забитых и пропущенных голов на команду
 
         #таблица для столбца "Команда_1"
@@ -56,7 +56,7 @@ class Football:
 
         return goals_1[["ЗГ", "ПГ"]].add(goals_2[["ЗГ", "ПГ"]])
 
-    def __calculate_game_scores(self) -> DataFrame:
+    def __calculate_game_scores(self):
         # возвращается таблица с вычисленными выигрышами, проигрышами, ничьими
 
 
@@ -78,14 +78,14 @@ class Football:
 
         return results_1[["В", "Н", "П"]].add(results_2[["В", "Н", "П"]])
 
-    def __calcultate_final_scores(self, game_scores: DataFrame) -> DataFrame:
+    def __calcultate_final_scores(self, game_scores: DataFrame):
         # вычисление итоговых очков: на 1 победу - +3 очка, на ничью - +1 очко
         return DataFrame({"О": game_scores["В"] * 3 + game_scores["Н"]})
 
 
 if __name__ == "__main__":
-    filename: str = input("Введите годы сезона (пример: 13-14): ")
-    path: str = f"csv\\rpl\\{filename}.csv"
+    filename = argv[1]
+    path = f"csv\\rpl\\{filename}.csv"
 
     try:
         championat = Football(path)
