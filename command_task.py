@@ -11,7 +11,7 @@ class Football:
         self.data = pd.read_csv(file)
 
         # счёт команд list[int, int]
-        self.score = list(map(lambda number: list(map(int, number[:3].split(":"))), self.data["счёт"].to_list()))
+        self.score = self.data["счёт"].apply(lambda s: list(map(int, s[:3].split(":"))))
         # команды, играющие друг против друга
         self.teams = [self.data["Команда_1"], self.data["Команда_2"]]
 
