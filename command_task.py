@@ -1,5 +1,4 @@
 from sys import argv
-
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -63,17 +62,17 @@ class Football:
         # таблица для столбца "Команда_1"
         results_1 = DataFrame({
             "Команда": self.teams[0],
-            "В": list(map(lambda x: 1 if x[0] > x[1] else 0, self.score)),
-            "Н": list(map(lambda x: 1 if x[0] == x[1] else 0, self.score)),
-            "П": list(map(lambda x: 1 if x[0] < x[1] else 0, self.score))
+            "В": map(lambda x: 1 if x[0] > x[1] else 0, self.score),
+            "Н": map(lambda x: 1 if x[0] == x[1] else 0, self.score),
+            "П": map(lambda x: 1 if x[0] < x[1] else 0, self.score)
         }).groupby("Команда").sum()
 
         # таблица для столбца "Команда_2"
         results_2 = DataFrame({
             "Команда": self.teams[1],
-            "В": list(map(lambda x: 1 if x[1] > x[0] else 0, self.score)),
-            "Н": list(map(lambda x: 1 if x[1] == x[0] else 0, self.score)),
-            "П": list(map(lambda x: 1 if x[1] < x[0] else 0, self.score))
+            "В": map(lambda x: 1 if x[1] > x[0] else 0, self.score),
+            "Н": map(lambda x: 1 if x[1] == x[0] else 0, self.score),
+            "П": map(lambda x: 1 if x[1] < x[0] else 0, self.score)
         }).groupby("Команда").sum()
 
         return results_1[["В", "Н", "П"]].add(results_2[["В", "Н", "П"]])
