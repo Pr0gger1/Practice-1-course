@@ -1,5 +1,6 @@
 from sys import argv
 
+import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
@@ -10,7 +11,7 @@ class Football:
         # извлечение таблицы из csv файла
         self.data = pd.read_csv(file)
 
-        # счёт команд list[int, int]
+        # счёт команд
         self.score = self.data["счёт"].apply(lambda s: list(map(int, s[:3].split(":"))))
         # команды, играющие друг против друга
         self.teams = [self.data["Команда_1"], self.data["Команда_2"]]
@@ -28,7 +29,7 @@ class Football:
         table = table.join([game_scores, goals, final_scores])
 
         table = table.sort_values(by=["О"], ascending=False).reset_index().rename(columns={"index": "Команда"})
-        table.index = list(range(1, table.shape[0] + 1))
+        table.index = np.arange(1, table.shape[0] + 1)
 
         return table
 
@@ -40,14 +41,14 @@ class Football:
     def __calculate_goals(self):
         # возвращается таблица с кол-вом забитых и пропущенных голов на команду
 
-        #таблица для столбца "Команда_1"
+        # таблица для столбца "Команда_1"
         goals_1 = DataFrame({
             "Команда": self.teams[0],
             "ЗГ": map(lambda x: x[0], self.score),
             "ПГ": map(lambda x: x[1], self.score)
         }).groupby("Команда").sum()
 
-        #таблица для столбца "Команда_2"
+        # таблица для столбца "Команда_2"
         goals_2 = DataFrame({
             "Команда": self.teams[1],
             "ЗГ": map(lambda x: x[1], self.score),
@@ -58,7 +59,6 @@ class Football:
 
     def __calculate_game_scores(self):
         # возвращается таблица с вычисленными выигрышами, проигрышами, ничьими
-
 
         # таблица для столбца "Команда_1"
         results_1 = DataFrame({
@@ -84,6 +84,7 @@ class Football:
 
 
 if __name__ == "__main__":
+    # filename = input("Введите имя файла (пример: 15-16): ")
     filename = argv[1]
     path = f"csv\\rpl\\{filename}.csv"
 
