@@ -25,9 +25,11 @@ class Football:
         # таблица с вычисленными итоговыми очками
         final_scores: DataFrame = self.__calcultate_final_scores(game_scores)
 
+        # склеиваем все таблицы в одну
         table = table.join([game_scores, goals, final_scores])
-
+        # сортируем таблицу по результирующим очкам
         table = table.sort_values(by=["О"], ascending=False).reset_index().rename(columns={"index": "Команда"})
+        # переопределяем индекс
         table.index = np.arange(1, table.shape[0] + 1)
 
         return table
@@ -43,18 +45,18 @@ class Football:
         # таблица для столбца "Команда_1"
         goals_1 = DataFrame({
             "Команда": self.teams[0],
-            "ЗГ": map(lambda x: x[0], self.score),
-            "ПГ": map(lambda x: x[1], self.score)
+            "ЗГ": self.score.apply(lambda x: x[0]),
+            "ПГ": self.score.apply(lambda x: x[1])
         }).groupby("Команда").sum()
 
         # таблица для столбца "Команда_2"
         goals_2 = DataFrame({
             "Команда": self.teams[1],
-            "ЗГ": map(lambda x: x[1], self.score),
-            "ПГ": map(lambda x: x[0], self.score)
+            "ЗГ": self.score.apply(lambda x: x[1]),
+            "ПГ": self.score.apply(lambda x: x[0])
         }).groupby("Команда").sum()
 
-        return goals_1[["ЗГ", "ПГ"]].add(goals_2[["ЗГ", "ПГ"]])
+        return goals_1.add(goals_2)
 
     def __calculate_game_scores(self):
         # возвращается таблица с вычисленными выигрышами, проигрышами, ничьими
@@ -62,20 +64,20 @@ class Football:
         # таблица для столбца "Команда_1"
         results_1 = DataFrame({
             "Команда": self.teams[0],
-            "В": map(lambda x: 1 if x[0] > x[1] else 0, self.score),
-            "Н": map(lambda x: 1 if x[0] == x[1] else 0, self.score),
-            "П": map(lambda x: 1 if x[0] < x[1] else 0, self.score)
+            "В": self.score.apply(lambda x: 1 if x[0] > x[1] else 0),
+            "Н": self.score.apply(lambda x: 1 if x[0] == x[1] else 0),
+            "П": self.score.apply(lambda x: 1 if x[0] < x[1] else 0)
         }).groupby("Команда").sum()
 
         # таблица для столбца "Команда_2"
         results_2 = DataFrame({
             "Команда": self.teams[1],
-            "В": map(lambda x: 1 if x[1] > x[0] else 0, self.score),
-            "Н": map(lambda x: 1 if x[1] == x[0] else 0, self.score),
-            "П": map(lambda x: 1 if x[1] < x[0] else 0, self.score)
+            "В": self.score.apply(lambda x: 1 if x[1] > x[0] else 0),
+            "Н": self.score.apply(lambda x: 1 if x[1] == x[0] else 0),
+            "П": self.score.apply(lambda x: 1 if x[1] < x[0] else 0)
         }).groupby("Команда").sum()
 
-        return results_1[["В", "Н", "П"]].add(results_2[["В", "Н", "П"]])
+        return results_1.add(results_2)
 
     def __calcultate_final_scores(self, game_scores: DataFrame):
         # вычисление итоговых очков: на 1 победу - +3 очка, на ничью - +1 очко
