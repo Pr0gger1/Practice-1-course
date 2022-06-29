@@ -9,7 +9,6 @@ class Football:
     def __init__(self, file: str):
         # извлечение таблицы из csv файла
         self.data = pd.read_csv(file)
-
         # счёт команд
         self.score = self.data["счёт"].apply(lambda s: list(map(int, s[:3].split(":"))))
         # команды, играющие друг против друга
@@ -84,14 +83,13 @@ class Football:
         return DataFrame({"О": game_scores["В"] * 3 + game_scores["Н"]})
 
 
-if __name__ == "__main__":
-    # filename = input("Введите имя файла (пример: 15-16): ")
-    filename = argv[1]
-    path = f"csv\\rpl\\{filename}.csv"
+# filename = input("Введите имя файла (пример: 15-16): ")
+filename = argv[1]
+path = f"csv\\rpl\\{filename}.csv"
 
-    try:
-        championat = Football(path)
-        # championat.final_table().to_csv("output.csv")
-        print(championat.final_table())
-    except FileNotFoundError:
-        print("Файл не существует!")
+try:
+    championat = Football(path)
+    # championat.final_table().to_csv("output.csv")
+    print(championat.final_table())
+except FileNotFoundError:
+    print("Файл не существует!")
