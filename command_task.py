@@ -1,10 +1,7 @@
-import itertools
 from sys import argv
 import numpy as np
 import pandas as pd
-from pandas import DataFrame
-
-
+from pandas import DataFrame, Series
 # # Сброс ограничений на количество выводимых рядов
 # pd.set_option('display.max_rows', None)
 #
@@ -52,7 +49,7 @@ class Football:
         # если есть команды с равными очками
         if not scores[scores > 1].empty:
             # таблица с личными встречами команд
-            private_meetings_table = self.__private_meetings(table)
+            private_meetings_table = self.__private_meetings(table, scores[scores > 1])
             # выполняем слияние основной таблицы с таблицей личных встреч
             table = pd.merge(table, private_meetings_table, how="outer")
             # сортируем по столбцам обоих таблиц
@@ -77,7 +74,7 @@ class Football:
         return DataFrame({
             "Игры": self.data["Команда_1"].value_counts() + self.data["Команда_2"].value_counts()})
 
-    def __calculate_goals(self, tables: list, scores: pd.Series):
+    def __calculate_goals(self, tables: list, scores: Series):
         # возвращается таблица с кол-вом забитых и пропущенных голов на команду
 
         # таблица для столбца "Команда_1"
@@ -96,7 +93,7 @@ class Football:
 
         return goals_1.add(goals_2)
 
-    def __calculate_game_scores(self, tables: list, scores: pd.Series):
+    def __calculate_game_scores(self, tables: list, scores: Series):
         # возвращается таблица с вычисленными выигрышами, проигрышами, ничьими
 
         # таблица для столбца "Команда_1"
@@ -121,45 +118,21 @@ class Football:
         # вычисление итоговых очков: на 1 победу - +3 очка, на ничью - +1 очко
         return DataFrame({"О": game_scores["В"] * 3 + game_scores["Н"]})
 
-    def __private_meetings(self, table: DataFrame):
-        # датафрейм, который показывает частоту вхождений очков команд
-        scores = table['О'].value_counts()
+    def __private_meetings(self, table: DataFrame, scores: Series):
+        # поиск команд, у которых кол-во очков совпадают
+        teams_equal = map(lambda score: table.loc[table['О'] == score]['Команда'], scores.index)
 
-        # датафрейм с вхождениями очков больше 1
-        scores = scores[scores > 1]
-
-        # датафрейм, в который входят команды с одинаковыми очками
-        recurring_team_points = table[table["О"].isin(scores.index.to_list())]
-
-        # достаем команды из первичной таблицы
-        raw_data = self.data[
-            (self.data["Команда_1"].isin(recurring_team_points["Команда"])) &
-            (self.data["Команда_2"].isin(recurring_team_points["Команда"]))
+        # поиск команд из первичной таблицы
+        origin_table_func = lambda teams: self.data[
+            (self.data['Команда_1'].isin(teams)) & (self.data['Команда_2'].isin(teams))
         ]
 
-        # удаление столбцов "стадион", "Дата", "Время"
-        raw_data.drop(columns=["стадион", "Дата", "Время"])
+        private_matches = map(origin_table_func, teams_equal)
+        private_matches = pd.concat(private_matches)
 
-        # список, в который собираются части датафреймов
-        private_matches = []
-        # список со списками индексов и очков
-        index_and_points = [[index, column["О"]] for index, column in recurring_team_points.iterrows()]
-
-        for first, second in itertools.product(range(len(index_and_points) - 1), range(1, len(index_and_points))):
-            if index_and_points[first][1] == index_and_points[second][1] and first != second:
-                team_1 = recurring_team_points.loc[index_and_points[first][0]]["Команда"]
-                team_2 = recurring_team_points.loc[index_and_points[second][0]]["Команда"]
-
-                meetings = raw_data[
-                    (raw_data["Команда_1"].isin([team_1, team_2])) & (raw_data["Команда_2"].isin([team_1, team_2]))
-                ]
-                private_matches.append(meetings)
-
-        # объединение частей датафреймов и удаление дубликатов
-        private_matches = pd.concat(private_matches).drop_duplicates()
-
-        # парсинг счета из таблицы final
+        # парсинг счета из таблицы private_matches
         meeting_scores = private_matches["счёт"].apply(self.__parsing_score)
+
         # подсчет кол-ва выигрышей ничьих и поражений
         meeting_game_scores = self.__calculate_game_scores(
             tables=[private_matches["Команда_1"], private_matches["Команда_2"]], scores=meeting_scores
@@ -176,7 +149,7 @@ class Football:
             0: "Разн",
             "В": "Выигр",
             "ЗГ": "Заб",
-        }).sort_values(by=["Заб", "Разн"], ascending=False).reset_index()
+        }).reset_index()
 
         # удаляем ненужные столбцы
         teams_meetings_table.drop(columns=["ПГ", "Н", "П"], axis=1, inplace=True)
