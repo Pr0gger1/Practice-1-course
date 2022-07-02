@@ -2,15 +2,6 @@ from sys import argv
 import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
-# # Сброс ограничений на количество выводимых рядов
-# pd.set_option('display.max_rows', None)
-#
-# # Сброс ограничений на число столбцов
-# pd.set_option('display.max_columns', None)
-#
-# # Сброс ограничений на количество символов в записи
-# pd.set_option('display.max_colwidth', None)
-
 
 class Football:
     def __init__(self, file: str):
@@ -35,10 +26,6 @@ class Football:
         # склеиваем все таблицы в одну
         table = table.join([game_scores, goals, final_scores])
 
-        table = table.join(DataFrame({
-            "Р": table["ЗГ"] - table["ПГ"]
-        }))
-
         # сортируем таблицу по результирующим очкам
         table = table.sort_values(by=["О"], ascending=False).reset_index().rename(
             columns={"index": "Команда"})
@@ -61,8 +48,6 @@ class Football:
             # удаляем ненужные столбцы
             table.drop(columns=["Выигр", "Заб", "Разн"], axis=1, inplace=True)
 
-        # меняем местами колонки
-        table = table.reindex(columns=["Команда", "Игры", "В", "Н", "П", "ЗГ", "ПГ", "Р", "О"])
         return table
 
     # парсинг счёта
