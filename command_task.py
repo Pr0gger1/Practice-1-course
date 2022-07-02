@@ -3,23 +3,24 @@ import numpy as np
 import pandas as pd
 from pandas import DataFrame, Series
 
+
 class Football:
     def __init__(self, file: str):
         # извлечение таблицы из csv файла
         self.data = pd.read_csv(file)
-        # счёт команд
-        self.score = self.data["счёт"].apply(self.__parsing_score)
-
-        # команды, играющие друг против друга
-        self.teams = [self.data["Команда_1"], self.data["Команда_2"]]
 
     def final_table(self):
-        # первичная таблица
+        # вытаскиваем счет с первичной таблицы
+        origin_score = self.data["счёт"].apply(self.__parsing_score)
+        # команды, играющие друг против друга
+        teams = [self.data["Команда_1"], self.data["Команда_2"]]
+
+        # таблица с кол-вом игр
         table: DataFrame = self.__count_games()
         # таблица с забитыми и пропущенными голами
-        goals: DataFrame = self.__calculate_goals(tables=self.teams, scores=self.score)
+        goals: DataFrame = self.__calculate_goals(tables=teams, scores=origin_score)
         # таблица с вычисленными победами, ничьими и поражениями
-        game_scores: DataFrame = self.__calculate_game_scores(tables=self.teams, scores=self.score)
+        game_scores: DataFrame = self.__calculate_game_scores(tables=teams, scores=origin_score)
         # таблица с вычисленными итоговыми очками
         final_scores: DataFrame = self.__calcultate_final_scores(game_scores)
 
@@ -31,12 +32,12 @@ class Football:
             columns={"index": "Команда"})
 
         # создаем объект с количеством вхождений очков
-        scores = table['О'].value_counts()
+        repeated_scores = table['О'].value_counts()
 
         # если есть команды с равными очками
-        if not scores[scores > 1].empty:
+        if not repeated_scores[repeated_scores > 1].empty:
             # таблица с личными встречами команд
-            private_meetings_table = self.__private_meetings(table, scores[scores > 1])
+            private_meetings_table = self.__private_meetings(table, repeated_scores[repeated_scores > 1])
             # выполняем слияние основной таблицы с таблицей личных встреч
             table = pd.merge(table, private_meetings_table, how="outer")
             # сортируем по столбцам обоих таблиц
@@ -104,7 +105,7 @@ class Football:
         return DataFrame({"О": game_scores["В"] * 3 + game_scores["Н"]})
 
     def __private_meetings(self, table: DataFrame, scores: Series):
-        # поиск команд, у которых кол-во очков совпадают
+        # поиск команд, у которых кол-во очков совпадает
         teams_equal = map(lambda score: table.loc[table['О'] == score]['Команда'], scores.index)
 
         # поиск команд из первичной таблицы
@@ -112,8 +113,8 @@ class Football:
             (self.data['Команда_1'].isin(teams)) & (self.data['Команда_2'].isin(teams))
         ]
 
-        private_matches = map(origin_table_func, teams_equal)
-        private_matches = pd.concat(private_matches)
+        # склеиваем команды с одинаковыми очками
+        private_matches = pd.concat(map(origin_table_func, teams_equal))
 
         # парсинг счета из таблицы private_matches
         meeting_scores = private_matches["счёт"].apply(self.__parsing_score)
