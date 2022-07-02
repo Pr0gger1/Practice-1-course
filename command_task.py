@@ -47,7 +47,7 @@ class Football:
             table.index = np.arange(1, table.shape[0] + 1)
 
             # удаляем ненужные столбцы
-            table.drop(columns=["Выигр", "Заб", "Разн"], axis=1, inplace=True)
+            table.drop(columns=["Выигр", "Заб", "Разн"], inplace=True)
 
         return table
 
@@ -138,7 +138,7 @@ class Football:
         }).reset_index()
 
         # удаляем ненужные столбцы
-        teams_meetings_table.drop(columns=["ПГ", "Н", "П"], axis=1, inplace=True)
+        teams_meetings_table.drop(columns=["ПГ", "Н", "П"], inplace=True)
 
         return teams_meetings_table
 
