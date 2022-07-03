@@ -127,7 +127,7 @@ class Football:
         # подсчет разницы забитых и пропущенных голов
         goal_difference = meeting_goals["ЗГ"] - meeting_goals["ПГ"]
 
-        # сортировка по забитым мячам и разности между забитыми и пропущенными
+        # склеиваем таблицы
         teams_meetings_table = meeting_goals.join([meeting_game_scores, goal_difference]).rename(columns={
             0: "Разн",
             "В": "Выигр",
