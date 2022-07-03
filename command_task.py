@@ -28,8 +28,7 @@ class Football:
         table = table.join([game_scores, goals, final_scores])
 
         # сортируем таблицу по результирующим очкам
-        table = table.sort_values(by=["О"], ascending=False).reset_index().rename(
-            columns={"index": "Команда"})
+        table = table.sort_values(by=["О"], ascending=False).reset_index().rename(columns={"index": "Команда"})
 
         # создаем объект с количеством вхождений очков
         repeated_scores = table['О'].value_counts()
@@ -115,18 +114,16 @@ class Football:
 
         # склеиваем команды с одинаковыми очками
         private_matches = pd.concat(map(origin_table_func, teams_equal))
+        # список команд, играющих друг против друга
+        teams_split = [private_matches["Команда_1"], private_matches["Команда_2"]]
 
         # парсинг счета из таблицы private_matches
         meeting_scores = private_matches["счёт"].apply(self.__parsing_score)
 
         # подсчет кол-ва выигрышей ничьих и поражений
-        meeting_game_scores = self.__calculate_game_scores(
-            tables=[private_matches["Команда_1"], private_matches["Команда_2"]], scores=meeting_scores
-        )
+        meeting_game_scores = self.__calculate_game_scores(tables=teams_split, scores=meeting_scores)
         # подсчет кол-ва забитых голов
-        meeting_goals = self.__calculate_goals(
-            tables=[private_matches["Команда_1"], private_matches["Команда_2"]], scores=meeting_scores
-        )
+        meeting_goals = self.__calculate_goals(tables=teams_split, scores=meeting_scores)
         # подсчет разницы забитых и пропущенных голов
         goal_difference = meeting_goals["ЗГ"] - meeting_goals["ПГ"]
 
@@ -149,8 +146,8 @@ filename = input("Введите имя файла (пример: 15-16): ")
 path = f"csv\\rpl\\{filename}.csv"
 
 try:
-    championat = Football(path)
-    # championat.final_table().to_csv("output.csv")
-    print(championat.final_table())
+    championship = Football(path)
+    # championship.final_table().to_csv("output.csv")
+    print(championship.final_table())
 except FileNotFoundError:
     print("Файл не существует!")
